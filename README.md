@@ -1,21 +1,26 @@
 # contact-manager-laravel 
 This is a contact manager containing admin and user roles. Image upload is performed via laravel. Migrations and seeders are also in place.
 
-#Ubuntu Server Setup
+# Ubuntu Server Setup
 
 Client Machine
 --------------
 Download GIT SCM https://git-scm.com/
+
 Create a git repository on github.com
+
 Initialize a git repository on your client machine (One time only per project)
-	git init
+    git init
+    
 Link it to your project(One time only per project)
 	git remote add origin https://github.com/veliyat/zeolearn-laravel-taskmanager.git
+    
 Add and commit files
-	git add .
-	git commit -m "abcd"
+    git add .
+    git commit -m "abcd"
+
 Commit the code of your project to github.com
-	git push orgin master
+    git push orgin master
 
 Ubuntu Server
 -------------
