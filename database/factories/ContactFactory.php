@@ -7,6 +7,6 @@ $factory->define(App\Contact::class, function (Faker $faker) {
         'first_name' => $faker->firstName,
         'last_name' => $faker->lastName,
         'email' => $faker->email,
-        'picture' => 'https://www.startupdelta.org/wp-content/uploads/2018/04/No-profile-LinkedIn.jpg'
+        'picture' => 'no-image.jpg'
     ];
 });
