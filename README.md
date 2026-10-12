@@ -1,115 +1,115 @@
-# contact-manager-laravel 
-This is a contact manager containing admin and user roles. Image upload is performed via laravel. Migrations and seeders are also in place.
+# Contact Manager (Laravel)
 
-# Ubuntu Server Setup
+A contact manager built with **Laravel 5.7** and **MySQL**, with separate **user** and **admin** areas.
 
-Client Machine
---------------
-Download GIT SCM https://git-scm.com/
+This is a **training project**. I built it for Laravel workshops to demonstrate authentication, resource controllers, middleware, migrations and seeders, file uploads, and deploying a Laravel app to an Ubuntu server. It is not a production application.
 
-Create a git repository on github.com
+## Features
 
-Initialize a git repository on your client machine (One time only per project)
-    git init
-    
-Link it to your project(One time only per project)
-	git remote add origin https://github.com/veliyat/zeolearn-laravel-taskmanager.git
-    
-Add and commit files
-    git add .
-    git commit -m "abcd"
+- User registration and login (Laravel auth scaffolding)
+- Personal dashboard
+- Full CRUD for contacts (Laravel resource controller), including image upload
+- Separate admin login (`/admin/login`) protected by a custom `isAdmin` middleware
+- Admin area to list users and activate or deactivate them
+- Database migrations and seeders
+- CKEditor integration (`unisharp/laravel-ckeditor`)
 
-Commit the code of your project to github.com
-    git push orgin master
+## Tech stack
 
-Ubuntu Server
--------------
-    update the apt repo (sudo apt update)
-    install nginx (sudo apt install nginx) EngineX Server
-    install mysql (sudo apt install mysql-server)
-    secure mysql (sudo mysql_secure_installation)
-    GRANT ALL PRIVILEGES ON *.* TO 'username'@'localhost' IDENTIFIED BY 'password';
-    
-    Install PHP 7.1
-	    sudo apt-get install software-properties-common
-	    sudo add-apt-repository ppa:ondrej/php	
-	    sudo apt-get update
-	    sudo apt-get install php7.1
-	    sudo apt-get install php7.1-fpm php7.1-mysql php7.1-mbstring php7.1-cli php7.1-common php7.1-json php7.1-opcache php7.1-mcrypt php7.1-zip
-	    sudo apt-get install php7.1-xml php7.1-gd
-	    sudo apt-get install php7.1-intl (optional)
-	    sudo apt-get install php7.1-xsl (optional)
+- PHP 7.1.3+
+- Laravel 5.7
+- MySQL
+- Composer
+- Laravel Mix (webpack) for front-end assets
+- Nginx on Ubuntu (deployment guide below)
 
-    config php installation
-	    /etc/php/7.1/fpm/php.ini (cgi.fix_pathinfo=0)
+## Prerequisites
 
-    restart php fpm
-	    sudo systemctl restart php7.1-fpm
-    
-    config nginx installation
-	    /etc/nginx/sites-available/default
-	
-    Change the root to /var/www/app/public;
-	add index.php to the list of files served by default
-	change server_name from _ to IP.
-	pass php scripts to fast cgi server
-		uncomment location, include and fastcgi_pass
-	deny access to htaccess files (uncomment the location .ht section)
-    Test the config of nginx (sudo nginx -t)
+- PHP 7.1.3 or higher with the usual Laravel extensions
+- [Composer](https://getcomposer.org/)
+- MySQL
 
-    Reload nginx server (sudo systemctl reload nginx)
+## Running locally
 
-Laravel Project Upload
----------------------------------------------------------------
-    Upload laravel project to web root (/var/www)
-	    create a new directory in www called app
-	    change the nginx default config to point to public folder (Nginx Config)
-	    change the fallback url to /index.php?$query_string (Nginx Config)
-	    Restart nginx server (sudo service nginx restart)
-    
-    Make a swap file (only for less memory)
-	    sudo fallocate -l 1G /swapfile
-	    sudo mkswap /swapfile
-	    sudo swapon /swapfile
+1. Clone the repo:
 
-    Install Composer
-	    curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+   ```bash
+   git clone https://github.com/veliyat/contact-manager-laravel.git
+   cd contact-manager-laravel
+   ```
 
-    Git Installation
-	    Git is installed by default
-	    make a dir /var/repo
-	    cd /var/repo
-	    mkdir site.git
+2. Create an empty MySQL database.
 
-    Git Init
-	    cd site.git
-	    git init --bare
-    
-    Create the post-receive hook
-	    cd hooks
-	create post-receive file
-		#!/bin/bash
-		git --work-tree=/var/www/laravel --git-dir=/var/repo/site.git checkout -f
-	
-    Change permissions (sudo chmod +x post-receive)
+3. Copy the environment file and set your `DB_DATABASE`, `DB_USERNAME` and `DB_PASSWORD`:
 
-Client Machine
---------------
-	cd into your project folder
-	add the new remote origin to production server
-		git remote add production ssh://root@45.77.109.61/var/repo/site.git
-	push the code to production server (git push production master)
+   ```bash
+   cp .env.example .env
+   ```
 
-Ubuntu Server
--------------
-	cd into yoru laravel app folder
-	composer install --no-dev	
-	sudo chown -R www-data:www-data /var/www/app
-	sudo chmod -R 775 /var/www/app/storage
-	sudo chmod -R 775 /var/www/app/bootstrap/cache
-	create .env file
-	php artisan key:generate
-	php artisan config:cache
+4. Install dependencies and set up the app:
 
-	if you are using storage in public
-		php artisan storage:link
+   ```bash
+   composer install
+   php artisan key:generate
+   php artisan migrate --seed
+   php artisan storage:link
+   php artisan serve
+   ```
+
+5. Open http://127.0.0.1:8000. The root URL redirects to the login page.
+
+Admin login is at `/admin/login`. Check `database/seeds` for the seeded admin account.
+
+## Routes at a glance
+
+| Area | URI | Notes |
+|---|---|---|
+| Auth | `/login`, `/register`, ... | Laravel `Auth::routes()` |
+| User | `/dashboard` | User dashboard |
+| User | `/contacts` | Resource routes (index, create, store, show, edit, update, destroy) |
+| Admin | `/admin/login`, `/admin/logout` | Separate admin authentication |
+| Admin | `/admin/dashboard`, `/admin/users` | Protected by `isAdmin` middleware |
+| Admin | `/admin/users/activate/{id}`, `/admin/users/deactivate/{id}` | Enable or disable a user |
+
+## Deploying to an Ubuntu server (Nginx + MySQL + PHP)
+
+A summary of the approach used in the workshop. Adjust the PHP version and paths for your server.
+
+1. **Install packages:** Nginx, MySQL, PHP (with `fpm`, `mysql`, `mbstring`, `xml`, `zip`, `gd` extensions) and Composer.
+2. **Point Nginx at the app:** set the server `root` to `/var/www/app/public` and pass PHP requests to PHP-FPM.
+3. **Create a bare Git repo on the server** with a `post-receive` hook that checks the code out into `/var/www/app`:
+
+   ```bash
+   git --work-tree=/var/www/app --git-dir=/var/repo/app.git checkout -f
+   ```
+
+4. **Add the server as a remote and push** from your machine:
+
+   ```bash
+   git remote add production ssh://<user>@<server>/var/repo/app.git
+   git push production master
+   ```
+
+5. **On the server**, inside `/var/www/app`:
+
+   ```bash
+   composer install --no-dev
+   cp .env.example .env        # then edit with production values
+   php artisan key:generate
+   php artisan config:cache
+   php artisan migrate --force
+   php artisan storage:link
+   sudo chown -R www-data:www-data storage bootstrap/cache
+   sudo chmod -R 775 storage bootstrap/cache
+   ```
+
+**Security notes:** use a dedicated deploy user rather than root, grant the MySQL user privileges only on the app's database, and keep `.env` out of version control.
+
+## Status and limitations
+
+- Built on Laravel 5.7 and PHP 7.1, both end-of-life. Fine for learning, not for deployment as is.
+- The deployment guide targets PHP 7.1; use a supported PHP version for any real setup.
+
+## Author
+
+Ravi Veliyat: [GitHub](https://github.com/veliyat) · [YouTube](https://www.youtube.com/raviveliyat)
